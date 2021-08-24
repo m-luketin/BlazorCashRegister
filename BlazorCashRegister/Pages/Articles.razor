@@ -1,0 +1,68 @@
+﻿@page "/articles"
+
+@using BlazorCashRegister.Data.Entities.Models
+@using BlazorCashRegister.Domain.Repositories.Interfaces
+@using System.Threading.Tasks
+@using System.Collections.Generic
+@using Microsoft.AspNetCore.Components
+@inject IArticleRepository ArticleRepository
+
+<h1 class="home-title">Articles</h1>
+<div class="home">
+    @if (articles is null)
+    {
+        <h1 class="home-loading">articles loading...</h1>
+    }
+    else
+    {
+        <div class="home-article-list-wrapper">
+            <button class="article-list-header">
+                <span class="article-list-header-name">Name</span>
+                <span class="article-list-header-price">Price</span>
+                <span class="article-list-header-units-in-stock">Units in stock</span>
+            </button>
+            <div class="home-article-list">
+                @foreach (var article in filteredArticles)
+                {
+                    { articleCounter++; }
+                    <button tabindex="@articleCounter" class="article-list-item">
+                        <span class="article-list-item-name">@article.Name</span>
+                        <span class="article-list-item-price">@article.Price$</span>
+                        <span class="article-list-item-units-in-stock">@article.UnitsInStock</span>
+                    </button>
+                }
+            </div>
+            <input tabindex="10" class="article-list-filter" placeholder="Filter articles..." type="text" @onchange="(evt) => OnFilterArticles(evt)" />
+        </div>
+    }
+    @if (selectedArticle is null)
+    {
+        <span class="empty-selected-articles">No article selected.</span>
+    }
+    else
+    {
+        <div class="selected-article-wrapper">
+
+        </div>
+    }
+    </div>
+
+@code {
+    private List<Article> articles;
+    private List<Article> filteredArticles;
+    private string filterText;
+    private int articleCounter = 10;
+    private Article selectedArticle;
+
+    protected override async Task OnInitializedAsync()
+    {
+        articles = await ArticleRepository.GetAllArticles();
+        filteredArticles = articles;
+    }
+
+    private void OnFilterArticles(ChangeEventArgs evt)
+    {
+        filterText = evt.Value.ToString();
+        filteredArticles = articles.Where(a => a.Name.ToUpper().Contains(filterText.ToUpper())).ToList();
+    }
+}

@@ -32,7 +32,6 @@ namespace BlazorCashRegister
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddSingleton<WeatherForecastService>();
 
             services.AddDbContext<CashRegisterContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("CashRegisterContext")));

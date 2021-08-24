@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31613.86
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorCashRegister", "BlazorCashRegister.csproj", "{AA075AEE-780C-4CA8-82F2-8B97D135FD1F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorCashRegister", "BlazorCashRegister\BlazorCashRegister.csproj", "{AA075AEE-780C-4CA8-82F2-8B97D135FD1F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorCashRegister.Domain", "..\BlazorCashRegister.Domain\BlazorCashRegister.Domain.csproj", "{60C6371E-430C-4F6E-9A02-7088182C0D2D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorCashRegister.Domain", "BlazorCashRegister.Domain\BlazorCashRegister.Domain.csproj", "{60C6371E-430C-4F6E-9A02-7088182C0D2D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorCashRegister.Data", "..\BlazorCashRegister.Data\BlazorCashRegister.Data.csproj", "{2BE620CE-94B4-44E0-9EDF-160BB6E8E5F8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorCashRegister.Data", "BlazorCashRegister.Data\BlazorCashRegister.Data.csproj", "{2BE620CE-94B4-44E0-9EDF-160BB6E8E5F8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

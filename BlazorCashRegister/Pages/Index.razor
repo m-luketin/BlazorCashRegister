@@ -1,7 +1,145 @@
 ﻿@page "/"
 
-<h1>Hello, world!</h1>
+@using BlazorCashRegister.Data.Entities.Models
+@using BlazorCashRegister.Domain.Repositories.Interfaces
+@using System.Threading.Tasks
+@using System.Collections.Generic
+@using Microsoft.AspNetCore.Components
+@inject IArticleRepository ArticleRepository
+@inject IReceiptRepository ReceiptRepository
 
-Welcome to your new app.
+<h1 class="home-title">Cash register v1.04312</h1>
+<div class="home">
+    @if (articles is null)
+    {
+        <h1 class="home-loading">articles loading...</h1>
+    }
+    else
+    {
+        <div class="home-article-list-wrapper">
+            <button class="article-list-header">
+                <span class="article-list-header-name">Name</span>
+                <span class="article-list-header-price">Price</span>
+                <span class="article-list-header-units-in-stock">Units in stock</span>
+            </button>
+            <div class="home-article-list">
+                @foreach (var article in filteredArticles)
+                {
+                    { articleCounter++; }
+                    <button tabindex="@articleCounter" class="article-list-item" @onclick="() => SelectItem(article.Barcode)">
+                        <span class="article-list-item-name">@article.Name</span>
+                        <span class="article-list-item-price">@article.Price$</span>
+                        <span class="article-list-item-units-in-stock">@article.UnitsInStock</span>
+                        <span class="oi oi-plus article-list-item-add"></span>
+                    </button>
+                }
+            </div>
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+            <input tabindex="10" class="article-list-filter" placeholder="Filter articles..." type="text" @onchange="(evt) => OnFilterArticles(evt)" />
+        </div>
+    }
+    <div class="home-selected-article-list-wrapper">
+        @if (selectedArticles.Count == 0)
+        {
+            <span class="empty-selected-articles">No articles selected.</span>
+        }
+        else
+        {
+            <button class="selected-article-list-header">
+                <span class="selected-article-list-header-name">Name</span>
+                <span class="selected-article-list-header-price">Price</span>
+                <span class="selected-article-list-header-units-in-stock">Units selected</span>
+            </button>
+            <div class="home-selected-article-list">
+
+                @foreach (var selectedArticle in selectedArticles)
+                {
+                    <button class="selected-article-list-item">
+                        <span class="selected-article-item-name">@selectedArticle.Article.Name</span>
+                        <span class="selected-article-item-price">@selectedArticle.Article.Price$</span>
+                        <span class="selected-article-item-units-in-stock">
+                            <span class="oi oi-minus" @onclick="() => ReduceItemQuantity(selectedArticle.Article.Barcode)"></span>
+                            @selectedArticle?.Quantity
+                            <span class="oi oi-plus" @onclick="() => IncreaseItemQuantity(selectedArticle.Article.Barcode)"></span>
+                        </span>
+                        <span class="oi oi-trash selected-article-list-item-remove" @onclick="() => RemoveItem(selectedArticle.Article.Barcode)"></span>
+                    </button>
+                }
+            </div>
+            <button tabindex="9" class="article-list-filter" type="button" @onclick="CreateReceipt">Confirm</button>
+
+
+        }
+    </div>
+</div>
+
+@code {
+    private List<Article> articles;
+    private List<Article> filteredArticles;
+    private List<ArticleReceipt> selectedArticles = new List<ArticleReceipt>();
+    private string filterText;
+    private int articleCounter = 10;
+
+    protected override async Task OnInitializedAsync()
+    {
+        articles = await ArticleRepository.GetAllArticles();
+        filteredArticles = articles;
+    }
+
+    private void SelectItem(Guid barcode)
+    {
+        var selectedArticle = filteredArticles.FirstOrDefault(a => a.Barcode == barcode);
+        if (selectedArticle is null)
+            return;
+
+
+        var alreadySelectedArticle = selectedArticles.FirstOrDefault(a => a.Article.Barcode == barcode);
+        if (alreadySelectedArticle is null)
+            selectedArticles.Add(new ArticleReceipt { Article = selectedArticle, Quantity = 1 });
+        else
+            alreadySelectedArticle.Quantity++;
+    }
+
+    private void RemoveItem(Guid barcode)
+    {
+        var articleToRemove = selectedArticles.FirstOrDefault(ar => ar.Article.Barcode == barcode);
+        if (articleToRemove is null)
+            return;
+
+        selectedArticles.Remove(articleToRemove);
+    }
+
+    private void OnFilterArticles(ChangeEventArgs evt)
+    {
+        filterText = evt.Value.ToString();
+        filteredArticles = articles.Where(a => a.Name.ToUpper().Contains(filterText.ToUpper())).ToList();
+    }
+
+
+    private void ReduceItemQuantity(Guid barcode)
+    {
+        var articleToReduce = selectedArticles.FirstOrDefault(a => a.Article.Barcode == barcode);
+        if (articleToReduce is null)
+            return;
+
+        if (articleToReduce.Quantity == 1)
+            selectedArticles.Remove(articleToReduce);
+        else
+            articleToReduce.Quantity--;
+    }
+
+    private void IncreaseItemQuantity(Guid barcode)
+    {
+        var articleToReduce = selectedArticles.FirstOrDefault(a => a.Article.Barcode == barcode);
+        if (articleToReduce is null)
+            return;
+
+        articleToReduce.Quantity++;
+    }
+
+    private void CreateReceipt()
+    {
+        ReceiptRepository.AddReceipt(Guid.NewGuid(), DateTime.Now, 1, 1, selectedArticles); //TODO update register and employee id
+        selectedArticles.Clear();
+    }
+}
