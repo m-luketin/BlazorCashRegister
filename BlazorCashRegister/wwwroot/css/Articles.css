@@ -1,0 +1,36 @@
+﻿.articles-article-list-header {
+    padding-right: 220px;
+}
+
+.selected-article-wrapper, .create-article-wrapper {
+    height: 900px;
+    width: 500px;
+    display: flex;
+    flex-direction: column;
+}
+
+.selected-article-title, .create-article-title {
+    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+    font-weight: 700;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 10px 65px 10px 5px;
+    font-size: 18px;
+    border: 1px solid #3a0647;
+}
+
+.selected-article-item, .create-article-item {
+    margin: 10px 0;
+    display: flex;
+    justify-content: space-between;
+}
+
+.selected-article-item input, .create-article-item input {
+    width: 60%;
+}
+
+.error-message {
+    color: red;
+}

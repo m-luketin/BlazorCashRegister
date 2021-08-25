@@ -14,6 +14,8 @@ namespace BlazorCashRegister.Domain.Repositories.Interfaces
 
         Task<bool> EditArticle(Article editedArticle);
 
+        Task<bool> RemoveArticle(Article articleToRemove);
+
         Task<Article> GetArticleById(int id);
 
         Task<Article> GetArticleByName(string name);

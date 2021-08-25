@@ -1,0 +1,107 @@
+﻿@page "/receipts"
+
+@using BlazorCashRegister.Data.Entities.Models
+@using BlazorCashRegister.Domain.Repositories.Interfaces
+@using System.Threading.Tasks
+@using System.Collections.Generic
+@using Microsoft.AspNetCore.Components
+@inject IReceiptRepository ReceiptRepository
+
+<h1 class="home-title">Receipts</h1>
+<div class="home">
+    @if (receipts is null)
+    {
+        <h1 class="home-loading">receipts loading...</h1>
+    }
+    else
+    {
+        <div class="home-receipt-list-wrapper">
+            <button class="receipt-list-header receipts-receipt-list-header">
+                <span class="receipt-list-header-name">Timestamp</span>
+                <span class="receipt-list-header-units-in-stock">Serial number</span>
+            </button>
+            <div class="home-receipt-list">
+                @foreach (var receipt in filteredReceipts)
+                {
+                    { receiptCounter++; }
+                    <button tabindex="@receiptCounter" class="receipt-list-item" @onclick="() => SelectReceipt(receipt)">
+                        <span class="receipt-list-item-units-in-stock">@receipt.TimeStamp</span>
+                        <span class="receipt-list-item-price">@receipt.SerialNumber</span>
+                    </button>
+                }
+            </div>
+            <input tabindex="10" class="receipt-list-filter" placeholder="Filter receipts..." type="text" @onchange="(evt) => OnFilterReceipts(evt)" />
+        </div>
+    }
+    @if (selectedReceipt is null)
+    {
+        <span>No receipt selected.</span>
+    }
+    else
+    {
+        <div class="selected-receipt-wrapper">
+            <div class="selected-receipt-title">Selected receipt</div>
+            <div class="selected-receipt-item">
+                <span>Timestamp: </span>
+                <input type="text" value="@selectedReceipt.TimeStamp" disabled />
+            </div>
+            <div class="selected-receipt-item">
+                <span>Serial number: </span>
+                <input type="text" @bind="@selectedReceipt.SerialNumber" disabled />
+            </div>
+            <div class="receipt-articles-title">Articles: </div>
+            <div class="receipt-article-list">
+                <button class="receipt-article-list-header">
+                    <span class="receipt-article-list-header-name">Name</span>
+                    <span class="receipt-article-list-header-price">Price</span>
+                    <span class="receipt-article-list-header-units-in-stock">Quantity</span>
+                </button>
+                @foreach (var articleReceipt in selectedReceipt.ArticleReceipts)
+                {
+                    <div class="receipt-article">
+                        <span>@articleReceipt.Article.Name</span>
+                        <span>@articleReceipt.Article.Price</span>
+                        <span>@articleReceipt.Quantity</span>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<Receipt> receipts;
+    private List<Receipt> filteredReceipts;
+    private string filterText;
+    private int receiptCounter = 10;
+    private Receipt selectedReceipt;
+    private string errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        receipts = await ReceiptRepository.GetAllReceipts();
+        filteredReceipts = receipts.OrderBy(r => r.TimeStamp).ToList();
+    }
+
+    private void OnFilterReceipts(ChangeEventArgs evt)
+    {
+        filterText = evt.Value.ToString();
+        filteredReceipts = receipts.Where(r => r.SerialNumber.ToString().ToLower().Contains(filterText.ToLower())).OrderBy(r => r.TimeStamp).ToList();
+    }
+
+    private async Task SelectReceipt(Receipt receiptToSelect)
+    {
+        var receipt = await ReceiptRepository.GetReceiptById(receiptToSelect.ReceiptId);
+        selectedReceipt = receipt;
+    }
+
+    private void DeselectReceipt()
+    {
+        selectedReceipt = null;
+    }
+
+    private void ShowError(string errorToShow)
+    {
+        errorMessage = errorToShow;
+    }
+}

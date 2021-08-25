@@ -16,20 +16,22 @@
     else
     {
         <div class="home-article-list-wrapper">
-            <button class="article-list-header">
+            <button class="article-list-header articles-article-list-header">
                 <span class="article-list-header-name">Name</span>
                 <span class="article-list-header-price">Price</span>
-                <span class="article-list-header-units-in-stock">Units in stock</span>
+                <span class="article-list-header-units-in-stock">Units</span>
             </button>
             <div class="home-article-list">
                 @foreach (var article in filteredArticles)
                 {
                     { articleCounter++; }
-                    <button tabindex="@articleCounter" class="article-list-item">
-                        <span class="article-list-item-name">@article.Name</span>
-                        <span class="article-list-item-price">@article.Price$</span>
-                        <span class="article-list-item-units-in-stock">@article.UnitsInStock</span>
-                    </button>
+                <button tabindex="@articleCounter" class="article-list-item">
+                    <span class="article-list-item-name">@article.Name</span>
+                    <span class="article-list-item-price">@article.Price$</span>
+                    <span class="article-list-item-units-in-stock">@article.UnitsInStock</span>
+                    <span class="oi oi-pencil" @onclick="() => SelectArticle(article)"></span>
+                    <span class="oi oi-trash" @onclick="() => DeleteArticle(article)"></span>
+                </button>
                 }
             </div>
             <input tabindex="10" class="article-list-filter" placeholder="Filter articles..." type="text" @onchange="(evt) => OnFilterArticles(evt)" />
@@ -37,15 +39,53 @@
     }
     @if (selectedArticle is null)
     {
-        <span class="empty-selected-articles">No article selected.</span>
+        <div class="create-article-wrapper">
+            <span class="create-article-title">Create new article</span>
+            <div class="create-article-item">
+                <span>Barcode: </span>
+                <input type="text" @bind-value="@articleToCreate.Barcode" disabled/>
+            </div>
+            <div class="create-article-item">
+                <span>Name: </span>
+                <input type="text" @bind-value="@articleToCreate.Name" />
+            </div>
+            <div class="create-article-item">
+                <span>Price: </span>
+                <input type="number" @bind-value="@articleToCreate.Price" />
+            </div>
+            <div class="create-article-item">
+                <span>Units in stock: </span>
+                <input type="number" @bind-value="@articleToCreate.UnitsInStock" />
+            </div>
+            <button class="create-article-button" @onclick="() => CreateArticle(articleToCreate)">Create</button>
+            <span class="error-message">@errorMessage</span>
+        </div>
     }
     else
     {
-        <div class="selected-article-wrapper">
-
-        </div>
-    }
+<div class="selected-article-wrapper">
+    <div class="selected-article-title">Selected article</div>
+    <div class="selected-article-item">
+        <span>Barcode: </span>
+        <input type="text" value="@selectedArticle.Barcode" disabled />
     </div>
+    <div class="selected-article-item">
+        <span>Name: </span>
+        <input type="text" @bind="@selectedArticle.Name" />
+    </div>
+    <div class="selected-article-item">
+        <span>Price: </span>
+        <input type="number" @bind="@selectedArticle.Price" />
+    </div>
+    <div class="selected-article-item">
+        <span>Units in stock: </span>
+        <input type="number" @bind="@selectedArticle.UnitsInStock" />
+    </div>
+    <button class="selected-article-button" @onclick="DeselectArticle">Deselect</button>
+    <button class="selected-article-button" @onclick="() => EditArticle(selectedArticle)">Confirm</button>
+</div>
+    }
+</div>
 
 @code {
     private List<Article> articles;
@@ -53,16 +93,89 @@
     private string filterText;
     private int articleCounter = 10;
     private Article selectedArticle;
+    private Article articleToCreate = new Article { Barcode = Guid.NewGuid(), Name = "", UnitsInStock = 0, Price = 0};
+    private string errorMessage;
 
     protected override async Task OnInitializedAsync()
     {
         articles = await ArticleRepository.GetAllArticles();
-        filteredArticles = articles;
+        filteredArticles = articles.OrderBy(a => a.Name).ToList();
     }
 
     private void OnFilterArticles(ChangeEventArgs evt)
     {
         filterText = evt.Value.ToString();
-        filteredArticles = articles.Where(a => a.Name.ToUpper().Contains(filterText.ToUpper())).ToList();
+        filteredArticles = articles.Where(a => a.Name.ToUpper().Contains(filterText.ToUpper())).OrderBy(a => a.Name).ToList();
+    }
+
+    private void SelectArticle(Article articleToSelect)
+    {
+        selectedArticle = articleToSelect;
+    }
+
+    private async Task CreateArticle(Article articleToCreate)
+    {
+        if (!ValidateArticle(articleToCreate))
+            return;
+
+        var wasSuccessful = await ArticleRepository.AddArticle(articleToCreate);
+        if(!wasSuccessful)
+        {
+            ShowError("Error!");
+            return;
+        }
+
+        articles.Add(articleToCreate);
+        filteredArticles.Add(articleToCreate);
+        articleToCreate = new Article { Barcode = Guid.NewGuid() };
+        selectedArticle = null;
+    }
+
+    private void EditArticle(Article articleToEdit)
+    {
+        ArticleRepository.EditArticle(articleToEdit);
+        selectedArticle = null;
+    }
+
+    private void DeleteArticle(Article articleToDelete)
+    {
+        ArticleRepository.RemoveArticle(articleToDelete);
+        articles.Remove(articleToDelete);
+        filteredArticles.Remove(articleToDelete);
+        selectedArticle = null;
+        errorMessage = "";
+    }
+
+    private void DeselectArticle()
+    {
+        selectedArticle = null;
+    }
+
+    private bool ValidateArticle(Article article)
+    {
+        if (article.Name.Length <= 3)
+        {
+            ShowError("Name too short!");
+            return false;
+        }
+
+        if (article.Price <= 0)
+        {
+            ShowError("Invalid price!");
+            return false;
+        }
+
+        if (article.UnitsInStock <= 0)
+        {
+            ShowError("Invalid amount of units!");
+            return false;
+        }
+
+        return true;
+    }
+
+    private void ShowError(string errorToShow)
+    {
+        errorMessage = errorToShow;
     }
 }

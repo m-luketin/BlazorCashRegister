@@ -4,14 +4,16 @@ using BlazorCashRegister.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BlazorCashRegister.Data.Migrations
 {
     [DbContext(typeof(CashRegisterContext))]
-    partial class CashRegisterContextModelSnapshot : ModelSnapshot
+    [Migration("20210825092122_RemovedArticleTax")]
+    partial class RemovedArticleTax
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

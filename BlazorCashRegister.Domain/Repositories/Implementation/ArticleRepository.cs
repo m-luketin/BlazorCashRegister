@@ -25,7 +25,7 @@ namespace BlazorCashRegister.Domain.Repositories.Implementation
 
         public async Task<bool> AddArticle(Article articleToAdd)
         {
-            if(DoesExist(articleToAdd) || IsNameValid(articleToAdd))
+            if(!IsNameValid(articleToAdd))
                 return false;
 
             await _context.Articles.AddAsync(articleToAdd);
@@ -36,17 +36,16 @@ namespace BlazorCashRegister.Domain.Repositories.Implementation
 
         public async Task<bool> EditArticle(Article editedArticle)
         {
-            if(!DoesExist(editedArticle) || IsNameValid(editedArticle))
+            if(!IsNameValid(editedArticle))
                 return false;
 
-            var articleToEdit = await _context.Articles.FindAsync(editedArticle.ArticleId);
-
-            if(articleToEdit is null || articleToEdit.UnitsInStock != editedArticle.UnitsInStock)
+            var articleToEdit = await _context.Articles.FirstOrDefaultAsync(a => a.Barcode == editedArticle.Barcode);
+            if(articleToEdit is null)
                 return false;
 
             articleToEdit.Price = editedArticle.Price;
-            articleToEdit.Barcode = editedArticle.Barcode;
-            articleToEdit.IsTaxRateReduced = editedArticle.IsTaxRateReduced;
+            articleToEdit.Name = editedArticle.Name;
+            articleToEdit.UnitsInStock = editedArticle.UnitsInStock;
             await _context.SaveChangesAsync();
 
             return true;
@@ -82,9 +81,16 @@ namespace BlazorCashRegister.Domain.Repositories.Implementation
             return true;
         }
 
-        private bool DoesExist(Article article)
+        public async Task<bool> RemoveArticle(Article articleToRemove)
         {
-            return _context.Articles.Any(a => string.Equals(a.Name, article.Name, StringComparison.CurrentCultureIgnoreCase));
+            var articleEntity = await _context.Articles.FirstOrDefaultAsync(a => a.Barcode == articleToRemove.Barcode);
+            if (articleEntity is null)
+                return false;
+
+            _context.Articles.Remove(articleEntity);
+            await _context.SaveChangesAsync();
+
+            return true;
         }
 
         private bool IsNameValid(Article article)

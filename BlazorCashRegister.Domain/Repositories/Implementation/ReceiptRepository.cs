@@ -50,7 +50,7 @@ namespace BlazorCashRegister.Domain.Repositories.Implementation
 
         public async Task<Receipt> GetReceiptById(int id)
         {
-            return await _context.Receipts.FindAsync(id);
+            return await _context.Receipts.Include(r => r.ArticleReceipts).FirstOrDefaultAsync(r=> r.ReceiptId == id);
         }
 
         private bool DoesExist(Receipt receipt)

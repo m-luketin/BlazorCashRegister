@@ -1,0 +1,138 @@
+﻿.selected-receipt-wrapper, .create-receipt-wrapper {
+    height: 900px;
+    width: 500px;
+    display: flex;
+    flex-direction: column;
+}
+
+.selected-receipt-title, .create-receipt-title {
+    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+    font-weight: 700;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 10px 65px 10px 5px;
+    font-size: 18px;
+    border: 1px solid #3a0647;
+}
+
+.selected-receipt-item, .create-receipt-item {
+    margin: 10px 0;
+    display: flex;
+    justify-content: space-between;
+}
+
+.selected-receipt-item input, .create-receipt-item input {
+    width: 60%;
+}
+
+.error-message {
+    color: red;
+}
+
+.home {
+    display: flex;
+    justify-content: space-around;
+}
+
+.home-title {
+    font-family: sans-serif;
+    font-weight: 700;
+    text-align: center;
+    padding-bottom: 10px;
+    margin-bottom: 50px;
+    border-bottom: 1px solid #3a0647;
+}
+
+.home-receipt-list-wrapper, .home-selected-receipt-list-wrapper {
+    height: 900px;
+    display: flex;
+    flex-direction: column;
+}
+
+.empty-selected-receipts {
+    width: 500px;
+    font-size: 24px;
+    text-align: center;
+}
+
+.receipt-list-header, .selected-receipt-list-header {
+    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+    font-weight: 700;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 10px 5px;
+    font-size: 18px;
+    border: 1px solid #3a0647;
+}
+
+.receipt-list-header span, .selected-receipt-list-header span {
+    width: 50%;
+}
+
+.home-receipt-list, .home-selected-receipt-list {
+    display: flex;
+    flex-direction: column;
+    overflow-y: scroll;
+    max-height: 600px;
+    width: 500px;
+}
+
+.receipt-list-item, .selected-receipt-list-item {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px;
+    background-color: white;
+}
+
+.receipt-list-item:focus, .selected-receipt-list-item:focus {
+    background-color: lightgrey;
+}
+
+.selected-receipt-list-item span, .receipt-list-item span {
+    width: 50%;
+}
+
+.receipt-list-filter {
+    position: absolute;
+    bottom: 200px;
+    height: 30px;
+    width: 500px;
+}
+
+.receipt-article-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.receipt-article {
+    display: flex;
+    justify-content: space-between
+}
+
+.receipt-articles-title {
+    margin-top: 20px;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.receipt-article-list-header {
+    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+    font-weight: 700;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 18px;
+    border: 1px solid #3a0647;
+    margin-top: 10px;
+}
+
+    .receipt-article-list-header span, .receipt-article span {
+        width: 33%;
+        text-align: center;
+    }
