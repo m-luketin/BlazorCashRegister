@@ -38,39 +38,41 @@
             <input tabindex="10" class="article-list-filter" placeholder="Filter articles..." type="text" @onchange="(evt) => OnFilterArticles(evt)" />
         </div>
     }
-    <div class="home-selected-article-list-wrapper">
-        @if (selectedArticles.Count == 0)
-        {
-            <span class="empty-selected-articles">No articles selected.</span>
-        }
-        else
-        {
-            <button class="selected-article-list-header">
-                <span class="selected-article-list-header-name">Name</span>
-                <span class="selected-article-list-header-price">Price</span>
-                <span class="selected-article-list-header-units-in-stock">Units selected</span>
-            </button>
-            <div class="home-selected-article-list">
+<div class="home-selected-article-list-wrapper">
+    @if (selectedArticles.Count == 0)
+    {
+        <span class="empty-selected-articles">No articles selected.</span>
+    }
+    else
+    {
+        <button class="selected-article-list-header">
+            <span class="selected-article-list-header-name">Name</span>
+            <span class="selected-article-list-header-price">Price</span>
+            <span class="selected-article-list-header-units-in-stock">Units selected</span>
+        </button>
+        <div class="home-selected-article-list">
 
-                @foreach (var selectedArticle in selectedArticles)
-                {
-                    <button class="selected-article-list-item">
-                        <span class="selected-article-item-name">@selectedArticle.Article.Name</span>
-                        <span class="selected-article-item-price">@selectedArticle.Article.Price$</span>
-                        <span class="selected-article-item-units-in-stock">
-                            <span class="oi oi-minus" @onclick="() => ReduceItemQuantity(selectedArticle.Article.Barcode)"></span>
-                            @selectedArticle?.Quantity
-                            <span class="oi oi-plus" @onclick="() => IncreaseItemQuantity(selectedArticle.Article.Barcode)"></span>
-                        </span>
-                        <span class="oi oi-trash selected-article-list-item-remove" @onclick="() => RemoveItem(selectedArticle.Article.Barcode)"></span>
-                    </button>
-                }
-            </div>
-            <button tabindex="9" class="article-list-filter" type="button" @onclick="CreateReceipt">Confirm</button>
-
-
-        }
-    </div>
+            @foreach (var selectedArticle in selectedArticles)
+            {
+                <button class="selected-article-list-item">
+                    <span class="selected-article-item-name">@selectedArticle.Article.Name</span>
+                    <span class="selected-article-item-price">@selectedArticle.Article.Price$</span>
+                    <span class="selected-article-item-units-in-stock">
+                        <span class="oi oi-minus" @onclick="() => ReduceItemQuantity(selectedArticle.Article.Barcode)"></span>
+                        @selectedArticle?.Quantity
+                        <span class="oi oi-plus" @onclick="() => IncreaseItemQuantity(selectedArticle.Article.Barcode)"></span>
+                    </span>
+                    <span class="oi oi-trash selected-article-list-item-remove" @onclick="() => RemoveItem(selectedArticle.Article.Barcode)"></span>
+                </button>
+            }
+        </div>
+        <div class="receipt-total-wrapper">
+            <span class="receipt-total">Total: </span>
+            <span>@total$</span>
+        </div>
+        <button tabindex="9" class="article-list-filter" type="button" @onclick="CreateReceipt">Confirm</button>
+    }
+</div>
 </div>
 
 @code {
@@ -79,11 +81,12 @@
     private List<ArticleReceipt> selectedArticles = new List<ArticleReceipt>();
     private string filterText;
     private int articleCounter = 10;
+    private int total;
 
     protected override async Task OnInitializedAsync()
     {
         articles = await ArticleRepository.GetAllArticles();
-        filteredArticles = articles;
+        filteredArticles = articles.OrderBy(a => a.Name).ToList();
     }
 
     private void SelectItem(Guid barcode)
@@ -92,12 +95,13 @@
         if (selectedArticle is null)
             return;
 
-
         var alreadySelectedArticle = selectedArticles.FirstOrDefault(a => a.Article.Barcode == barcode);
         if (alreadySelectedArticle is null)
             selectedArticles.Add(new ArticleReceipt { Article = selectedArticle, Quantity = 1 });
         else
             alreadySelectedArticle.Quantity++;
+
+        CalculateTotal();
     }
 
     private void RemoveItem(Guid barcode)
@@ -107,12 +111,13 @@
             return;
 
         selectedArticles.Remove(articleToRemove);
+        CalculateTotal();
     }
 
     private void OnFilterArticles(ChangeEventArgs evt)
     {
         filterText = evt.Value.ToString();
-        filteredArticles = articles.Where(a => a.Name.ToUpper().Contains(filterText.ToUpper())).ToList();
+        filteredArticles = articles.Where(a => a.Name.ToUpper().Contains(filterText.ToUpper())).OrderBy(a => a.Name).ToList();
     }
 
 
@@ -126,6 +131,8 @@
             selectedArticles.Remove(articleToReduce);
         else
             articleToReduce.Quantity--;
+
+        CalculateTotal();
     }
 
     private void IncreaseItemQuantity(Guid barcode)
@@ -135,11 +142,22 @@
             return;
 
         articleToReduce.Quantity++;
+        CalculateTotal();
     }
 
     private void CreateReceipt()
     {
         ReceiptRepository.AddReceipt(Guid.NewGuid(), DateTime.Now, 1, 1, selectedArticles); //TODO update register and employee id
         selectedArticles.Clear();
+    }
+
+    private void CalculateTotal()
+    {
+        total = 0;
+
+        foreach (var articleReceipt in selectedArticles)
+        {
+            total += articleReceipt.Quantity * articleReceipt.Article.Price;
+        }
     }
 }

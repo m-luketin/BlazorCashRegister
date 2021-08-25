@@ -132,7 +132,19 @@
     margin-top: 10px;
 }
 
-    .receipt-article-list-header span, .receipt-article span {
-        width: 33%;
-        text-align: center;
-    }
+.receipt-article-list-header span, .receipt-article span {
+    width: 33%;
+    text-align: center;
+}
+
+.receipt-total-wrapper {
+    margin-top: 10px;
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.receipt-total-wrapper span {
+    font-size: 24px;
+    font-weight: 700;
+}

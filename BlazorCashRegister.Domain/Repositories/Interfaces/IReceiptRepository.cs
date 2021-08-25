@@ -13,5 +13,7 @@ namespace BlazorCashRegister.Domain.Repositories.Interfaces
         Task<int> AddReceipt(Guid serialNumber, DateTime timeStamp, int employeeId, int cashRegisterId, List<ArticleReceipt> articleReceipts);
 
         Task<Receipt> GetReceiptById(int id);
+
+        Task<int> GetReceiptTotalById(int id);
     }
 }

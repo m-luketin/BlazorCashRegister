@@ -53,6 +53,20 @@ namespace BlazorCashRegister.Domain.Repositories.Implementation
             return await _context.Receipts.Include(r => r.ArticleReceipts).FirstOrDefaultAsync(r=> r.ReceiptId == id);
         }
 
+
+        public async Task<int> GetReceiptTotalById(int id)
+        {
+            var total = 0;
+            var receipt = await _context.Receipts.Include(r => r.ArticleReceipts).FirstOrDefaultAsync(r => r.ReceiptId == id);
+
+            foreach (var articleReceipt in receipt.ArticleReceipts)
+            {
+                total += articleReceipt.Quantity * articleReceipt.Article.Price;
+            }
+
+            return total;
+        }
+
         private bool DoesExist(Receipt receipt)
         {
             return _context.Receipts.Any(r => r.SerialNumber == receipt.SerialNumber);

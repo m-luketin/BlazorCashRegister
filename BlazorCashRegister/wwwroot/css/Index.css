@@ -48,6 +48,10 @@
     width: 500px;
 }
 
+.home-selected-article-list {
+    max-height: 575px;
+}
+
 .article-list-item, .selected-article-list-item {
     display: flex;
     justify-content: space-between;
